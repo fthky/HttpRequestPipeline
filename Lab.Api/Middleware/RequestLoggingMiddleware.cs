@@ -13,10 +13,12 @@ public sealed class RequestLoggingMiddleware
 
     public async Task Invoke(HttpContext context)
     {
-        _logger.LogInformation($"IN -> Method: {context.Request.Method}, Path: {context.Request.Path}");
+        var correlationId = context.Items["X-Request-Id"]?.ToString() ?? "n/a";
+        
+        _logger.LogInformation($"IN -> Method: {context.Request.Method}, Path: {context.Request.Path} | X-Request-Id: {correlationId}");
 
         await _next(context);
         
-        _logger.LogInformation($"OUT -> StatusCode: {context.Response.StatusCode}, Method: {context.Request.Method}, Path: {context.Request.Path}");
+        _logger.LogInformation($"OUT -> StatusCode: {context.Response.StatusCode}, Method: {context.Request.Method}, Path: {context.Request.Path} | X-Request-Id: {correlationId}");
     }
 }
