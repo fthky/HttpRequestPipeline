@@ -1,0 +1,23 @@
+
+# --- .NET build outputs ---
+bin/
+obj/
+
+# --- User-specific files ---
+*.user
+*.suo
+*.rsuser
+
+# --- Visual Studio / Rider ---
+.vs/
+.idea/
+
+# --- Logs ---
+*.log
+
+# --- OS files ---
+.DS_Store
+Thumbs.db
+
+# --- Publish outputs ---
+publish/
