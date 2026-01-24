@@ -1,4 +1,4 @@
-namespace Lab.Api.Middleware;
+namespace HttpRequestPipeline.Api.Middleware;
 
 public sealed class RequestLoggingMiddleware
 {

@@ -1,5 +1,4 @@
-namespace Lab.Api.Middleware;
-
+namespace HttpRequestPipeline.Api.Middleware;
 public class CorrelationIdMiddleware
 {
    private const string HeaderName = "X-Request-Id";
