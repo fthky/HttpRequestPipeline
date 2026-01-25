@@ -7,15 +7,16 @@ builder.Services.AddHttpClient("api", (serviceProvider, client) =>
 });
 var app = builder.Build();
 
+app.UseMiddleware<HttpRequestPipeline.Gateway.Middleware.CorrelationIdMiddleware>();
+app.UseMiddleware<HttpRequestPipeline.Gateway.Middleware.RequestLoggingMiddleware>();
+
+
 app.MapGet("/ping", async (HttpContext context, IHttpClientFactory httpClientFactory) =>
 {
-    var correlationId = context.Request.Headers["X-Request-Id"].FirstOrDefault();
-    if (string.IsNullOrWhiteSpace(correlationId))
-    {
-        correlationId = Guid.NewGuid().ToString("N");
-    }
     
-    context.Response.Headers["X-Request-Id"] = correlationId;
+    var correlationId = context.Items[
+        HttpRequestPipeline.Gateway.Middleware.CorrelationIdMiddleware.HeaderName
+    ]?.ToString();
 
     var client = httpClientFactory.CreateClient("api");
 
