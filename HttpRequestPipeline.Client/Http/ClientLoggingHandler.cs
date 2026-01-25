@@ -19,7 +19,7 @@ public sealed class ClientLoggingHandler : DelegatingHandler
             ? values.FirstOrDefault()
             : "n/a";
 
-        _logger.LogInformation($"CLIENT -> {request.Method} {request.RequestUri} | X-Request-Id = {correlationId}");
+        _logger.LogInformation($"CLIENT -> {request.Method} {request.RequestUri} | X-Request-Id: {correlationId}");
 
         var response = await base.SendAsync(request, cancellationToken);
 
@@ -27,7 +27,7 @@ public sealed class ClientLoggingHandler : DelegatingHandler
             ? outValues.FirstOrDefault() 
             : "n/a";
 
-        _logger.LogInformation($"CLIENT <- {(int)response.StatusCode} {response.ReasonPhrase} {request.RequestUri} | X-Request-Id = {returnedCorrelationId}");
+        _logger.LogInformation($"CLIENT <- {(int)response.StatusCode} {response.ReasonPhrase} {request.RequestUri} | X-Request-Id: {returnedCorrelationId}");
         
         return response;
     }
