@@ -1,33 +1,40 @@
-﻿using Microsoft.Extensions.Configuration;
+﻿using HttpRequestPipeline.Client.Http;
+using Microsoft.Extensions.Configuration;
+using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.Hosting;
 
-var config = new ConfigurationBuilder()
-    .AddJsonFile("appsettings.json", optional: false)
-    .AddEnvironmentVariables()
+var host = Host.CreateDefaultBuilder(args)
+    .UseContentRoot(AppContext.BaseDirectory)
+    .ConfigureAppConfiguration(config =>
+    {
+        config.SetBasePath(AppContext.BaseDirectory);
+        config.AddJsonFile("appsettings.json", optional: false)
+            .AddEnvironmentVariables();
+    }).ConfigureServices((context, services) =>
+    {
+        var gatewayBaseUrl = context.Configuration["Gateway:BaseUrl"];
+        if (string.IsNullOrWhiteSpace(gatewayBaseUrl))
+            throw new InvalidOperationException(
+                "Gateway:BaseUrl is required.");
+
+        services.AddTransient<CorrelationIdHandler>();
+
+        services.AddHttpClient("gateway", client =>
+            {
+                client.BaseAddress = new Uri(gatewayBaseUrl);
+            })
+            .AddHttpMessageHandler<CorrelationIdHandler>();
+    })
     .Build();
-    
-var gatewayBaseUrl = config["Gateway:BaseUrl"];
 
-if (String.IsNullOrWhiteSpace(gatewayBaseUrl))
-{
-    throw new InvalidOperationException("Gateway:BaseUrl is required");
-}
+var factory = host.Services.GetRequiredService<IHttpClientFactory>();
+var http = factory.CreateClient("gateway");
 
-using var http = new HttpClient();
-http.BaseAddress = new Uri(gatewayBaseUrl);
+Console.WriteLine("CLIENT -> GET /ping (X-Request-Id is added automatically)");
+var res = await http.GetAsync("/ping");
 
-var correlationId = "test-123"; //Guid.NewGuid().ToString("N");
+var body = await res.Content.ReadAsStringAsync();
+var returnedRequestId = res.Headers.TryGetValues("X-Request-Id", out var values) ? values.FirstOrDefault() : null;
 
-using var request = new HttpRequestMessage(HttpMethod.Get, "/ping");
-request.Headers.TryAddWithoutValidation("X-Request-Id", correlationId);
-
-Console.WriteLine($"CLIENT -> GET /ping | X-Request-Id={correlationId}");
-
-using var response = await http.SendAsync(request);
-
-var responseBody = await response.Content.ReadAsStringAsync();
-var returnedCorrelationId = response.Headers.TryGetValues("X-Request-Id", out var values)
-    ? values.FirstOrDefault()
-    : null;
-
-Console.WriteLine($"CLIENT <- {(int)response.StatusCode} {response.ReasonPhrase} | X-Request-Id={returnedCorrelationId}");
-Console.WriteLine($"BODY: {responseBody}");
+Console.WriteLine($"CLIENT <- {(int)res.StatusCode} {res.ReasonPhrase} | X-Request-Id={returnedRequestId}");
+Console.WriteLine($"BODY: {body}");
