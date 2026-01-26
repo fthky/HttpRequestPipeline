@@ -15,10 +15,17 @@ public sealed class RequestLoggingMiddleware
     {
         var correlationId = context.Items["X-Request-Id"]?.ToString() ?? "n/a";
         
-        _logger.LogInformation($"IN -> Method: {context.Request.Method}, Path: {context.Request.Path} | X-Request-Id: {correlationId}");
+        _logger.LogInformation("IN -> Method: {RequestMethod}, Path: {RequestPath} | X-Request-Id: {CorrelationId}",
+            context.Request.Method,
+            context.Request.Path,
+            correlationId);
 
         await _next(context);
         
-        _logger.LogInformation($"OUT -> StatusCode: {context.Response.StatusCode}, Method: {context.Request.Method}, Path: {context.Request.Path} | X-Request-Id: {correlationId}");
+        _logger.LogInformation("OUT -> StatusCode: {ResponseStatusCode}, Method: {RequestMethod}, Path: {RequestPath} | X-Request-Id: {CorrelationId}",
+            context.Response.StatusCode,
+            context.Request.Method,
+            context.Request.Path,
+            correlationId);
     }
 }

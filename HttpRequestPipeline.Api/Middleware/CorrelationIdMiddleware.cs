@@ -19,11 +19,11 @@ public class CorrelationIdMiddleware
       if (string.IsNullOrWhiteSpace(correlationId))
       {
          correlationId = Guid.NewGuid().ToString("N");
-         _logger.LogInformation($"Generated new {HeaderName}: {correlationId}");
+         _logger.LogInformation("Generated new {HeaderName}: {CorrelationId}", HeaderName, correlationId);
       }
       else
       {
-         _logger.LogInformation($"Using incoming {HeaderName}: {correlationId}");
+         _logger.LogInformation("Using incoming {HeaderName}: {CorrelationId}", HeaderName, correlationId);
       }
 
       context.Items[HeaderName] = correlationId;
