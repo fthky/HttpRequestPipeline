@@ -21,3 +21,25 @@ Thumbs.db
 
 # --- Publish outputs ---
 publish/
+
+
+# --- Environment variables ---
+.env
+.env.local
+
+!.env.example 
+
+# --- Environment-specific appsettings ---
+appsettings.Development.json
+appsettings.Production.json
+appsettings.*.json
+
+!appsettings.json
+!appsettings.Example.json
+
+
+# --- Vim temp files ---
+*.swp
+*.swo
+*.swn
+*.swx
