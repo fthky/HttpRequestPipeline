@@ -7,10 +7,15 @@ var host = Host.CreateDefaultBuilder(args)
     .UseContentRoot(AppContext.BaseDirectory)
     .ConfigureServices((context, services) =>
     {
-        var gatewayBaseUrl = context.Configuration["Gateway:BaseUrl"];
+        
+        var gatewayBaseUrl = Environment.GetEnvironmentVariable("GATEWAY__BASEURL")
+                             ?? context.Configuration["Gateway:BaseUrl"];
+
         if (string.IsNullOrWhiteSpace(gatewayBaseUrl))
             throw new InvalidOperationException(
-                "Gateway:BaseUrl is required.");
+                "GATEWAY__BASEURL environment variable or Gateway:BaseUrl is required.");
+
+        Console.WriteLine($"[CONFIG] Using Gateway BaseUrl: {gatewayBaseUrl}");
 
         services.AddTransient<CorrelationIdHandler>();
         services.AddTransient<ClientLoggingHandler>();

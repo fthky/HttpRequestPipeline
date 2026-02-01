@@ -1,0 +1,41 @@
+# Build outputs
+**/bin/
+**/obj/
+
+# IDE and editor folders
+.vs/
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+
+# Git
+.git/
+.gitignore
+.gitattributes
+
+# Environment and secrets
+**/.env
+**/.env.*
+!**/.env.example
+
+# Documentation
+*.md
+LICENSE
+
+# Test results
+**/TestResults/
+
+# User-specific files
+*.user
+*.suo
+
+# Docker files (no need to copy these into the image)
+**/.dockerignore
+**/Dockerfile
+**/docker-compose*.yml
+
+# OS files
+.DS_Store
+Thumbs.db

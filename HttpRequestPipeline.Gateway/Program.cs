@@ -30,4 +30,6 @@ app.MapGet("/ping", async (HttpContext context, IHttpClientFactory httpClientFac
     return Results.Content(body, "text/plain");
 });
 
+app.MapGet("/health", () => Results.Ok(new { status = "healthy", service = "gateway" }));
+
 app.Run();

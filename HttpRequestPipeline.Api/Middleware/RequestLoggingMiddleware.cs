@@ -13,19 +13,25 @@ public sealed class RequestLoggingMiddleware
 
     public async Task Invoke(HttpContext context)
     {
+        if (context.Request.Path.StartsWithSegments("/health"))
+        {
+            await _next(context);
+            return;
+        }
+
         var correlationId = context.Items["X-Request-Id"]?.ToString() ?? "n/a";
-        
-        _logger.LogInformation("IN -> Method: {RequestMethod}, Path: {RequestPath} | X-Request-Id: {CorrelationId}", 
+
+        _logger.LogInformation("IN -> Method: {RequestMethod}, Path: {RequestPath} | X-Request-Id: {CorrelationId}",
             context.Request.Method,
             context.Request.Path,
             correlationId);
 
         await _next(context);
-        
+
         _logger.LogInformation("OUT -> StatusCode: {ResponseStatusCode}, Method: {RequestMethod}, Path: {RequestPath} | X-Request-Id: {CorrelationId}",
             context.Response.StatusCode,
             context.Request.Method,
-            context.Request.Path, 
+            context.Request.Path,
             correlationId);
     }
 }

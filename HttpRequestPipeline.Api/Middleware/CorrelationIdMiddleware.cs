@@ -19,11 +19,18 @@ public class CorrelationIdMiddleware
       if (string.IsNullOrWhiteSpace(correlationId))
       {
          correlationId = Guid.NewGuid().ToString("N");
-         _logger.LogInformation("Generated new {HeaderName}: {CorrelationId}", HeaderName, correlationId);
+
+         if (!context.Request.Path.StartsWithSegments("/health"))
+         {
+            _logger.LogInformation("Generated new {HeaderName}: {CorrelationId}", HeaderName, correlationId);
+         }
       }
       else
       {
-         _logger.LogInformation("Using incoming {HeaderName}: {CorrelationId}", HeaderName, correlationId);
+         if (!context.Request.Path.StartsWithSegments("/health"))
+         {
+            _logger.LogInformation("Using incoming {HeaderName}: {CorrelationId}", HeaderName, correlationId);
+         }
       }
 
       context.Items[HeaderName] = correlationId;

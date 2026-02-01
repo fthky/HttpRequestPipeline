@@ -1,0 +1,73 @@
+services:
+  api:
+    build:
+      context: .
+      dockerfile: HttpRequestPipeline.Api/Dockerfile
+    env_file:
+      - ./HttpRequestPipeline.Api/.env
+    # PROD-LIKE: API sadece internal
+    expose:
+      - "5161"
+    # DEV istiyorsan bunu expose yerine ports yap:
+    # ports:
+    #   - "5161:5161"
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:5161/health"]
+      interval: 10s
+      timeout: 5s
+      retries: 3
+      start_period: 10s
+    deploy:
+      resources:
+        limits:
+          cpus: '0.5'      # Maksimum 0.5 CPU core
+          memory: 512M     # Maksimum 512MB RAM
+        reservations:
+          cpus: '0.25'     # Minimum garanti 0.25 CPU
+          memory: 256M     # Minimum garanti 256MB RAM
+
+  gateway:
+    build:
+      context: .
+      dockerfile: HttpRequestPipeline.Gateway/Dockerfile
+    env_file:
+      - ./HttpRequestPipeline.Gateway/.env
+    depends_on:
+      api:
+        condition: service_healthy  # API healthy olana kadar Gateway başlamaz
+    ports:
+      - "5294:5294"
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:5294/health"]
+      interval: 10s
+      timeout: 5s
+      retries: 3
+      start_period: 10s
+    deploy:
+      resources:
+        limits:
+          cpus: '0.5'      # Maksimum 0.5 CPU core
+          memory: 512M     # Maksimum 512MB RAM
+        reservations:
+          cpus: '0.25'     # Minimum garanti 0.25 CPU
+          memory: 256M     # Minimum garanti 256MB RAM
+
+  client:
+    build:
+      context: .
+      dockerfile: HttpRequestPipeline.Client/Dockerfile
+    env_file:
+      - ./HttpRequestPipeline.Client/.env
+    depends_on:
+      gateway:
+        condition: service_healthy  # Gateway healthy olana kadar Client başlamaz
+    profiles: ["client"]
+    restart: "no"
+    deploy:
+      resources:
+        limits:
+          cpus: '0.25'     # Client geçici çalıştığı için daha az
+          memory: 256M
+        reservations:
+          cpus: '0.1'
+          memory: 128M
